@@ -1,0 +1,239 @@
+\documentclass[12pt]{article}
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{tabularx}
+\usepackage{hyperref}
+
+
+\begin{document}
+
+% ---------- First Page (flush right) ----------
+\thispagestyle{empty} % no header/footer on first page
+\begin{flushright}
+\Huge SOFTWARE DESIGN SPECIFICATIONS \\
+\vspace{2cm}
+BOE Sidewalk Assessment \\
+\vspace{2cm}
+\large Version 1.1 \\
+\vspace{4cm}
+Prepared For \\
+\vspace{0.5cm}
+\normalsize City of Los Angeles, Bureau of Engineering \\
+\vspace{2cm}
+\large Prepared By \\
+\vspace{0.5cm}
+\normalsize Joe Miranda - David Hernandez - Jose Carpinteyro - Douglas Sanchez \\
+\vspace{2cm}
+\large 5 December 2025
+\end{flushright}
+
+\newpage % move to next page
+\tableofcontents
+\newpage
+
+\section*{\Large Version Description}
+
+\begin{tabularx}{\textwidth}{|l|l|X|l|}
+\hline
+\textbf{Name} & \textbf{Date} & \textbf{Reason for Change} & \textbf{Version} \\ \hline
+Joe Miranda & 12/05/2025 & Final draft & 1.1 \\ \hline
+Jose Carpinteyro & 11/30/2025 & First draft & 1.0 \\ \hline
+\end{tabularx}
+
+\newpage
+
+% ---------- Normal Pages Start Here ----------
+\section{Introduction}
+
+\subsection{Purpose}
+
+This Software Design Document (SDD) outlines the architecture and design of the control software for the Sidewalk Assessment System, developed for the Los Angeles City Bureau of Engineering. This document includes all software enhancements implemented during Fall 2025 and Spring 2026, with a primary focus on improving the sidewalk joint segmentation workflow used for vertical displacement measurement. \\
+While previous teams developed the collision avoidance system, website integration, and initial vertical displacement prototype, the 2025–2026 team concentrated on the U-Net deep learning pipeline that segments sidewalk joints from orthoimages. This segmentation is a critical input to accurate vertical displacement measurement. \\
+The scope of this SDD remains limited to software components relating to data collection, processing, and segmentation-based analysis. The rover hardware already includes built-in control software; therefore, ROS is used as a middleware layer for communication with sensors and for handling rover movement and data acquisition. Our team’s software contributions focus on improving machine learning preprocessing, training, integration, and validation within the vertical displacement subsystem. \\
+This document includes updates to the system architecture, module interactions, training pipeline workflows, and algorithmic details related to segmentation improvements and integration with the displacement module. \\
+
+\subsection{Intended Audience and Reading Suggestions}
+
+This Software Design Document (SSD) is intended for all individuals directly involved in the continued development and deployment of the BOE Sidewalk Assessment System, including: \\
+
+Developers and Data Scientists: to use this document as a guide for implementing code modules, training models, and processing data according to defined specifications. \\
+
+\begin{itemize}
+    \item Project Managers: To understand project objectives, performance goals, and deliverables achieved during this iteration.  
+    \item Testers and QA Engineers: To design verification procedures ensuring model accuracy and software reliability.  
+    \item BOE Stakeholders and City Engineers: to review the software’s alignment with ADA compliance standards and its operational readiness.  
+    \item Documentation and Future Academic Teams: to use this as a reference for continued project maintenance, scaling, or transfer of ownership.     
+\end{itemize}
+
+Recommended reading sequence: \\
+\begin{itemize}
+    \item Project Inheritance and Background – Review earlier SDD documents (prior to Fall 2025) to understand the rover hardware, ROS integration, data-collection workflow, and the existing vertical displacement software.
+    \item Overview of This Documentation – Begin with this SDD to understand the 2025–2026 software changes, specifically the redesigned segmentation pipeline.
+    \item Introduction to ROS – Since many rover components communicate via ROS topics and messages, readers unfamiliar with ROS should review its core concepts before examining module interactions.
+    \item Segmentation Pipeline Architecture – After understanding the system structure, review the updated U-Net preprocessing and training design to understand the modifications introduced this year.
+    \item Vertical Displacement Workflow – Once familiar with segmentation outputs, read how these outputs are used in the displacement measurement algorithm and how they interface with elevation images.
+\end{itemize}
+
+\subsection{System Overview}
+The Sidewalk Assessment System (SAS) is a robotic platform developed to evaluate sidewalk conditions by capturing LiDAR-based point cloud data, computing elevation changes, and identifying vertical displacements that may violate ADA compliance standards. The rover captures and processes sidewalk geometry to assist BOE engineers in sidewalk-repair planning across the city. \\
+During Fall 2025 and Spring 2026, the team’s work centered on strengthening the software pipeline responsible for segmentation of sidewalk joints, which are used to localize areas where displacement measurements must be computed. The previous generation’s displacement module depends critically on the quality of segmentation masks; therefore, improving dataset quality, training robustness, and model consistency was the main focus this year. \\
+
+\textbf{ \large Segmentation Pipeline Improvements} \\
+
+This academic year, the team redesigned and improved the segmentation system used for detecting sidewalk joints. The updated workflow includes: \\
+
+\textbf{Dataset Reconstruction and Standardization} A new dataset was assembled from field-collected orthoimages. Images were relabeled, resized, normalized, and standardized into a consistent format suitable for U-Net training. \\
+
+\textbf{Updated Preprocessing and Augmentation} New augmentation strategies were implemented to increase model robustness, including rotation jitter, random cropping, lighting adjustments, and multi-scale transformations. \\ 
+
+\textbf{Redesigned U-Net Training Pipeline} Using the TensorFlow/Keras framework, the team rebuilt the training script and added:
+\begin{itemize}
+    \item Clearer directory structures
+    \item Reproducible training configurations
+    \item Improved validation monitoring
+    \item Cross-dataset comparison utilities
+    \item Adjustable loss functions (Dice loss, binary cross-entropy, and combined losses)
+\end{itemize}
+
+\textbf{Integration With Elevation-Image Displacement Workflow} The new segmentation masks were integrated into the existing vertical displacement GitHub repository. Masks are now exported in a format directly compatible with the displacement-calculation script. \\
+
+\textbf{Validation and Accuracy Testing} The segmentation outputs were evaluated against elevation-image overlays to verify that joint boundaries aligned correctly in areas with known displacement. \\
+
+\textbf{Required Operating Environments} The system continues to require two separate operating environments: \\
+\begin{itemize}
+    \item Ubuntu (Linux) for the rover – Runs ROS Noetic and handles sensor communication.
+    \item Windows or Linux for model training – Supports TensorFlow, Keras, CUDA/ROCm, and point-cloud visualization libraries (Open3D optional).
+\end{itemize}
+
+
+\textbf{Rover Hardware and Software (Inherited)} The rover platform used remains unchanged from previous years and includes: \\
+\begin{itemize}
+    \item Sonar sensors – real-time obstacle detection (originally by the 2024–2025 team)
+    \item LiDAR sensor – point cloud acquisition
+    \item Level sensor – inclinometer
+    \item GPS module – coordinates and tracking
+    \item Raspberry Pi – runs ROS for sensor data collection
+\end{itemize}
+
+The LiDAR-captured point clouds continue to be processed using the PointCloud2OrthoImage algorithm, which outputs: \\
+\begin{itemize}
+    \item an orthographic (2D) projection of the sidewalk
+    \item an elevation map aligned to the same coordinate system
+\end{itemize}
+
+These outputs serve as the input to the segmentation module. \\
+
+
+\section{SYSTEM ARCHITECTURE}
+The architectural strategies for the 2025 Sidewalk Assessment System focus is on keeping the software workflow organized, stable, and easy to update. Instead of rebuilding all previous models and components, the main work focus is on improving parts that affect segmentation quality and vertical displacement results. Allowing the system to be consistent with previous years while still having impactful upgrades. \\
+
+\subsection{Workflow of the system}
+
+A simplified view of the workflow process is as follows: \\
+
+LiDAR Scan → Raw .las file  → Pointcloud2OrthoImage → Orthoimage (RGB) + Elevation image (DEM)  → U-Net Segmentation  → Segmentation mask  →  Vertical Displacement Computation → CSV results + visualization images
+
+\subsection{System Breakdown}
+\subsubsection{Collecting Data}
+\begin{itemize}
+    \item iPhone with LiDAR scanning app
+    \item Export files and convert to a .las file 
+\end{itemize}
+
+\subsubsection{Orthoimage Generation}
+PointCloud to OrthoImage generation
+\begin{itemize}    
+    \item Align point cloud to the ground plane
+    \item Downsample
+    \item Project to a 2D grid
+    \item Output RGB and elevation images
+\end{itemize}
+
+\subsubsection{Segmentation}
+\begin{itemize}
+    \item UNet model trained on 256x256 tiles from RGB orthoimages
+    \item Outputs binary masks positioning sidewalk joints and cracks
+\end{itemize}
+
+\subsubsection{Displacement Measurement}
+\begin{itemize}
+    \item Combines elevation images and masks
+    \item Extracts left/right slab elevations
+    \item Computes vertical displacement and emits CSV results
+\end{itemize}
+
+\subsubsection{Models Interaction}
+\begin{itemize}
+    \item Data Acquisition → passes .las files to Point Cloud Processing.
+    \item Point Cloud Processing → provides RGB and DEM images to UNet Segmentation and Displacement Module.
+    \item UNet Segmentation → sends *SEG.png to Vertical Displacement Computation.
+    \item Vertical Displacement Computation → returns numeric results to Visualization and Reporting tools.
+\end{itemize}
+
+\subsubsection{System Split Reasoning}
+We split the system into these modules to:
+\begin{itemize}
+    \item Isolate LiDAR/point-cloud details from ML training
+    \item Allows future teams to replace or upgrade only the segmentation model or only the displacement logic  
+    \item Keeps the rover control logic independent of heavy ML processing and storage requirements
+\end{itemize}
+
+\section{USER INTERFACE}
+\subsection{Data Acquisition and Processing}
+\textbf{Rover operation}
+\begin{itemize}
+    \item Power on rover
+    \item Connect to rover's internal wifi with touch screen device
+    \item Operate rover's controls with joystick and d-pad
+\end{itemize}
+\textbf{iPhone LiDAR}
+\begin{itemize}
+    \item Power on iPhone
+    \item Open LiDAR app
+    \item Start recording
+    \item Stop recording
+\end{itemize}
+\textbf{U-Net Model}
+\begin{itemize}
+    \item Download images from LiDAR app
+    \item Save to cloud drive
+    \item Run U-Net mesh program
+    \item Analyze output
+\end{itemize}
+\subsection{Database Design and Explanation}
+\textbf{Information about the data storage design}
+Data storage was mainly focused on the rover and UNet improvements. \\
+During Fall 2025:
+\begin{itemize}
+    \item Raw iPhone LiDAR data was stored locally on the iPhone
+    \item Scans were uploaded to Microsoft Teams SharePoint
+    \item Members downloaded the data to their personal machines for processing
+\end{itemize}
+
+
+\section{GLOSSARY}
+SAS – Sidewalk Assessment System \\
+ROS – Robot Operating System \\
+ADA – Americans with Disabilities Act \\
+LiDAR – Light Detection and Ranging; uses pulsed laser light to measure distances. \\
+Front-end – Part of a software system that users interact with directly. \\
+Back-end – Part of a system responsible for data processing and communication with services. \\
+NavigateLA – Web-based mapping application used by LA City departments. \\
+CSV file – Comma-Separated Values; plain-text table format. \\
+API – Application Programming Interface; lets computer programs communicate with each other. \\
+SDK – Software Development Kit; tools and libraries for building applications on a platform. \\
+HTML – HyperText Markup Language; standard language for web pages. \\
+JPEG – Joint Photographic Experts Group; compressed image format. \\
+Point cloud – Set of (x, y, z) points representing a 3D surface; can also store RGB values. \\
+UNet – Deep learning architecture for image segmentation, used here to label sidewalk joints. \\
+Orthoimage – 2D top-down (bird’s-eye) image derived from a 3D point cloud, geometrically corrected. \\
+DEM – Digital Elevation Model; elevation values mapped to a 2D grid. \\
+CUDA - Compute Unified Device Architecture required for NVIDIA GPU computing. \\
+ROCm - Radeon Open Compute platform required for AMD GPU computing. \\
+
+\section{REFERENCES}
+U-Net repository: \url{https://github.com/yealina/unetboe2025} \\
+Vertical displacement: \url{https://github.com/Jose-APV/boe-step-4-vertical-displacement} \\
+
+\end{document}

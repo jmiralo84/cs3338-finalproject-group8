@@ -1,0 +1,252 @@
+\documentclass[12pt]{article}
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{tabularx}
+
+
+\begin{document}
+
+% ---------- First Page (flush right) ----------
+\thispagestyle{empty} % no header/footer on first page
+\begin{flushright}
+\Huge SOFTWARE REQUIREMENTS SPECIFICATIONS \\
+\vspace{2cm}
+BOE Sidewalk Assessment \\
+\vspace{2cm}
+\large Version 1.2 \\
+\vspace{4cm}
+Prepared For \\
+\vspace{0.5cm}
+\normalsize City of Los Angeles, Bureau of Engineering \\
+\vspace{2cm}
+\large Prepared By \\
+\vspace{0.5cm}
+\normalsize Joe Miranda - David Hernandez - Jose Carpinteyro - Douglas Sanchez \\
+\vspace{2cm}
+\large 5 December 2025
+\end{flushright}
+
+\newpage % move to next page
+\tableofcontents
+\newpage
+
+\section*{\Large Version Description}
+
+\begin{tabularx}{\textwidth}{|l|l|X|l|}
+\hline
+\textbf{Name} & \textbf{Date} & \textbf{Reason for Change} & \textbf{Version} \\ \hline
+Joe Miranda & 12/05/2025 & Final draft & 1.2 \\ \hline
+David Hernandez & 11/30/2025 & Updated layout for clarity & 1.1 \\ \hline
+Joe Miranda & 11/28/2025 & First draft & 1.0 \\ \hline
+\end{tabularx}
+
+\newpage
+
+% ---------- Normal Pages Start Here ----------
+\section{Introduction}
+
+The BOE Sidewalk Assessment System is an ongoing collaboration between the City of Los Angeles Bureau of Engineering (BOE) and California State University, Los Angeles. Its primary goal is to automate the identification of sidewalk defects, such as cracks, uplifted slabs, and non-ADA-compliant slopes, using computer vision and LiDAR-based data collection. \\
+
+During the current semester, the project team focused on refining the existing U-Net machine learning model to improve its accuracy in detecting cracks and joints in sidewalk pavement images. The team also collected additional training data using the Magni Ubiquity Rover and processed new LiDAR scans through the existing Point2Ortho pipeline to produce higher quality orthoimages and elevation maps. These refinements directly enhance the model’s ability to predict vertical displacement and classify sidewalk damage with greater reliability. \\
+
+This SRS defines the software requirements for the updated data-processing and segmentation pipeline, emphasizing accuracy, scalability, and usability improvements achieved during the current development cycle. \\
+
+\subsection{Purpose}
+The purpose of this Software Requirements Specification (SRS) is to formally define the updated requirements, functionalities, and performance expectations for the BOE Sidewalk Assessment System, version 1.1 \\
+
+This version focuses on the refinement of machine learning algorithms and supporting data-processing tools to increase precision in crack and displacement detection. It details the system’s behavior, interfaces, and data flow from rover-based data collection to final prediction outputs.  \\
+
+The document covers the following key areas: \\
+\begin{itemize}
+    \item Integration of new training datasets collected via the Magni Ubiquity Rover and 3D Scanner App.  
+
+    \item Enhancement of the U-Net segmentation model for improved detection of cracks and joints.  
+
+    \item Refinement of post-processing tools such as Point2Ortho for converting raw point clouds to orthoimages.  
+
+    \item Alignment of outputs with BOE’s ADA compliance assessment standards. 
+\end{itemize}
+
+This document will serve as the basis for subsequent system validation, testing, and design documentation (SDD). It provides a foundation for future development teams to build upon the improved software framework established this semester. \\
+
+\subsection{Intended Audience and Reading Suggestions}
+
+This document is intended for all individuals directly involved in the continued development and deployment of the BOE Sidewalk Assessment System, including: \\
+
+Developers and Data Scientists: to use this document as a guide for implementing code modules, training models, and processing data according to defined specifications. \\
+
+\begin{itemize}
+    \item Project Managers: To understand project objectives, performance goals, and deliverables achieved during this iteration.  
+    \item Testers and QA Engineers: To design verification procedures ensuring model accuracy and software reliability.  
+    \item BOE Stakeholders and City Engineers: to review the software’s alignment with ADA compliance standards and its operational readiness.  
+    \item Documentation and Future Academic Teams: to use this as a reference for continued project maintenance, scaling, or transfer of ownership.     
+\end{itemize}
+
+Recommended reading sequence: \\
+\begin{itemize}
+    \item Project Managers and Stakeholders: Sections 1 and 2 (overview, scope, and high-level objectives).  
+    \item Developers and Data Scientists: Sections 3 and 4 (interface details and functional requirements).  
+    \item Testers: Sections 4 and 5 (verification, safety, and performance metrics). 
+\end{itemize}
+
+\subsection{Software Overview}
+The BOE Sidewalk Assessment System is a hybrid hardware software platform designed to automate the inspection of sidewalks for surface irregularities and ADA compliance. The system integrates LiDAR scanning, image segmentation, and data visualization components to deliver actionable insights to BOE engineers. The features included are: \\
+\begin{itemize}
+    \item Data collection using the Magni Ubiquity Rover, equipped with LiDAR, sonar, and a mounted iPhone 14 Pro Max running the 3D Scanner App.  
+    \item Data pre-processing and conversion via the Point2Ortho Python tool, which generates orthoimages and elevation maps from point clouds.  
+    \item Data pre-processing and conversion via the Point2Ortho Python tool, which generates orthoimages and elevation maps from point clouds.  
+    \item Machine learning-based segmentation using a U-Net deep learning model implemented in Python with TensorFlow and OpenCV.  
+    \item Measurement of vertical displacement, crack length, and slab boundaries from segmented outputs.  
+    \item Post-processing pipeline capable of storing processed data in Azure Blob Storage and visualizing results through EZ Maps and NavigateLA integration.  
+    \item The refined system provides greater analytical accuracy, reduces manual review time, and improves repeatability of measurements. Future iterations will aim for fully autonomous crack detection and ADA compliance scoring. 
+\end{itemize}
+
+\section{EXTERNAL INTERFACE REQUIREMENTS}
+The BOE Sidewalk Assessment System interacts with multiple external components, including hardware sensors, mobile applications, and remote data processing environments. This section describes all major user, hardware, software, and communication interfaces that enable data collection, processing, and visualization. 
+\subsection{User Inteface}
+The system provides three main user interfaces for data collection and analysis:  \\
+
+\textbf{Rover Control Interface}
+The rover control interface allows operators to manage rover movement, monitor sensor status, and initiate data collection sessions. This interface includes: \\
+\begin{itemize}
+    \item Display Elements 
+    \begin{itemize}
+        \item Battery percentage and connection status.  
+        \item Rover status indicators (active, standby, or offline).  
+    \end{itemize}
+    \item Controls:
+    \begin{itemize}
+        \item Directional pad (D-pad) for precise movement.  
+        \item Joystick or touchscreen-based control for faster maneuvering.   
+    \end{itemize}
+    The interface runs on an internet browser connected to the rover’s Wi-Fi network. 
+\end{itemize}
+\textbf{Data Processing Dashboard}
+This secondary interface is used during preprocessing and analysis stages. It enables the user to: \\
+\begin{itemize}
+    \item Upload new point-cloud or orthoimage datasets for segmentation.  
+    \item View intermediate outputs (e.g., crack masks, elevation overlays).  
+    \item Track model training status and validate metrics.  
+    \item Export processed results in .csv, .tif, and .png formats. 
+\end{itemize}
+The dashboard runs on the same local PC used for model refinement and connects to Azure Blob Storage for long-term data management. 
+
+\subsection{Software Interfaces}
+The software stack integrates multiple layers of communication between the rover’s operating system, preprocessing scripts, and the machine learning model. \\
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Software/ Module } & \textbf{Purpose/ Function } \\ \hline
+ROS (Robot Operating System) & Manages rover communication, motor control, and sensor data logging. \\ \hline
+Python 3.x & Core development language for preprocessing and ML tasks. \\ \hline
+Point2Ortho & Converts LiDAR point-cloud data into orthoimages and elevation maps. \\ \hline
+TensorFlow + U-Net Model & TensorFlow provides the framework; the integrated U-Net architecture performs image segmentation to identify cracks and slab joints. \\ \hline
+OpenCV & Handles image normalization, cropping, and augmentation before inference. \\ \hline
+NumPy / Pandas & Perform numeric computation and dataset management. \\ \hline
+Azure Blob Storage & Stores processed datasets, model outputs, and checkpoints.  \\ \hline
+EZ Maps & Displays processed data in BOE’s NavigateLA GIS environment.  \\ \hline
+\end{tabularx}
+
+\section{LEGAL AND ETHICAL CONSIDERATIONS}
+The Bureau of Engineering for the City of Los Angeles must ensure compliance with Federal ADA standards, which govern sidewalk accessibility. To support this, the rover is designed to measure crossing slopes, running slopes, and GPS coordinates for sidewalk assessments. It also detects and flags uneven surfaces greater than 13 millimeters, identifying them as potential tripping hazards. 
+
+Another legal consideration is data privacy. The rover is equipped with cameras and other sensors that collect environmental data. However, this data collection may unintentionally capture pedestrians or other personal information, raising privacy concerns. Ensuring compliance with data protection laws and implementing measures to anonymize or securely handle collected data will be critical to addressing these concerns. 
+\newpage
+
+\section{GLOSSARY}
+
+\textbf{A} \\
+
+ADA (Americans with Disabilities Act) – A U.S. civil rights law that prohibits discrimination against individuals with disabilities and outlines accessibility standards, including sidewalk slope and displacement regulations.  \\
+
+AWS (Amazon Web Services) – A cloud computing platform used for hosting services, including the post-processing software in this project.  \\
+
+Azure Blob Storage – Microsoft’s cloud storage solution for storing unstructured data like point clouds, orthoimages, and elevation data.  \\
+
+\textbf{B} \\
+
+BOE (Bureau of Engineering) – A department within the City of Los Angeles overseeing infrastructure projects, including this sidewalk assessment system. \\
+
+\textbf{C} \\
+
+CSULA / Cal State LA – California State University, Los Angeles; academic partner involved in the development and research of the project. \\
+
+\textbf{D} \\
+
+D-Pad (Directional Pad) – A flat control interface allowing directional navigation, used in the Rover Control Software for precise rover movement. \\
+
+\textbf{E} \\
+
+Elevation Image – A 2D representation of elevation (height) derived from point cloud data, used to identify sidewalk slope and vertical displacement.  \\
+
+EZ Maps – A LiDAR-based mapping interface integrated into the system that also provides live camera views and navigation features.  \\
+
+\textbf{G} \\
+
+GIS (Geographic Information System) – A framework for managing spatial data. In this project, GIS is used by the City of LA for displaying collected sidewalk data.  \\
+
+GPS (Global Positioning System) – A satellite-based navigation system used by the rover to collect precise location coordinates during sidewalk scanning.  \\ 
+
+\textbf{I} \\
+
+iPhone 14 Pro Max – The mobile device used to collect sidewalk data via the 3D Scanner App utilizing built-in LiDAR.  \\
+
+\textbf{J} \\
+
+Joystick – A physical or virtual input device used for faster and more flexible rover movement. \\
+
+\textbf{L} \\
+
+LiDAR (Light Detection and Ranging) – A remote sensing technology that uses laser pulses to generate 3D models and point clouds of physical environments like sidewalks.  \\
+
+\textbf{M} \\
+
+Magni Ubiquity Rover – The autonomous rover used to scan sidewalks and collect sensor data for the assessment system. \\
+
+Machine Learning – A method of data analysis that automates analytical model building. Used here to train models that detect sidewalk displacements. \\
+
+\textbf{N} \\
+
+NavigateLA – The City of Los Angeles’s GIS web portal used for accessing and visualizing urban data such as sidewalks and infrastructure conditions.  \\
+
+NVIDIA GPU – A high-performance graphics processor required for training deep learning models such as U-Net used in segmentation tasks.  \\
+
+\textbf{O} \\
+
+Orthoimage – A geometrically corrected image from LiDAR data that accurately represents sidewalk surface topography without distortion.  \\
+
+\textbf{P} \\
+
+Point Cloud – A 3D dataset representing scanned surface points captured by LiDAR or 3D scanning technology.  \\
+
+Pointcloud2OrthoimageToolV1 – A Python script that converts point cloud data into orthoimages and elevation images for analysis.  \\
+
+Post-Processing – The step where raw point cloud data is processed into usable forms like orthoimages and elevation maps for further analysis.  \\
+
+\textbf{R} \\
+
+Raspberry Pi 4 – A compact computing device that runs the robot’s software and ROS on Ubuntu Linux.  \\
+
+ROS (Robot Operating System) – A middleware framework used to develop and operate the rover control system and manage sensor inputs.  \\
+
+\textbf{S} \\
+
+Segmentation – The process of identifying and isolating specific parts of an image, such as sidewalk joints, using a deep learning model like U-Net.  \\
+
+Slope – The angle or incline of the sidewalk surface measured to determine ADA compliance.  \\ 
+
+Sonar Sensor – A sensor that detects nearby obstacles using sound waves, enabling collision avoidance.  \\
+
+SRS (Software Requirements Specification) – A formal document outlining the goals, functionalities, environment, and technical specifications of the software.  \\
+
+\textbf{T} \\
+
+Training Data – Labeled data used to teach machine learning models how to detect sidewalk issues in new, unseen data.  \\
+
+\textbf{U} \\
+
+U-Net – A convolutional neural network architecture used for semantic segmentation of images to identify sidewalk joints and detect vertical displacement.  \\
+
+Ubuntu – A Linux operating system distribution used on the Raspberry Pi for operating ROS and other rover software.  \\
+
+\end{document}
