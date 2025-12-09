@@ -1,0 +1,204 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{enumitem}
+
+\title{BOESidewalk Enhancement Project \\ Design Specification}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+The City of Los Angeles maintains over 11{,}000 miles of sidewalks. When a sidewalk segment does not settle evenly or has been raised by tree root growth, the sidewalk becomes uneven. This can create pedestrian hazards. In addition, the City is obligated to ensure that its sidewalks conform to Federal ADA standards, which limit the extent to which a sidewalk may slope.
+
+The BOESidewalk project is part of a multi–year effort to design a rover-based system that can inspect sidewalks, collect sensor data, and help city staff identify sidewalk segments that require maintenance. Previous terms have delivered a rover capable of:
+\begin{itemize}[nosep]
+    \item Moving with remote control,
+    \item Measuring crossing slopes and running slopes,
+    \item Collecting GPS data, and
+    \item Capturing photo images of sidewalks.
+\end{itemize}
+
+This term, our team extends the existing BOESidewalk software and documentation. The focus is on supporting new hardware modules, improving safety features such as collision avoidance, performing field tests, and producing complete project documentation and testing artifacts.
+
+\subsection*{Base Repository}
+The project is based on the existing public repository:
+\begin{quote}
+\url{https://github.com/jungsoolim77/BOESidewalk.git}
+\end{quote}
+
+The repository structure (relevant to this design spec) includes:
+\begin{itemize}[nosep]
+    \item \texttt{src/}: Python code for data processing and rover logic,
+    \item \texttt{boe\_sidewalk\_ui/}: Web user interface files (HTML/JavaScript/CSS),
+    \item \texttt{boe\_sidewalk\_ws/}: Web service or workspace files used to connect UI and backend,
+    \item \texttt{data/}: Sample data collected from the rover,
+    \item \texttt{images/}: Sample images of sidewalks and rover UI.
+\end{itemize}
+
+\section{Project Objectives for This Term}
+
+The current term focuses on the following software-related tasks:
+
+\subsection*{Task 1: Vertical Displacement Module Support}
+Work with the Mechanical Engineering (ME) department to support the module that measures vertical displacement on the sidewalk. Software must:
+\begin{itemize}[nosep]
+    \item Accept vertical displacement readings from the ME module,
+    \item Store or transmit this data together with GPS and image data,
+    \item Provide a way to visualize or export displacement results.
+\end{itemize}
+
+\subsection*{Task 2: Collision Avoidance Function}
+
+Implement a collision avoidance function on the rover and improve the existing application web site:
+\begin{itemize}[nosep]
+    \item Integrate sensor data (e.g., ultrasonic, LiDAR, or proximity sensors),
+    \item Detect obstacles in front of the rover,
+    \item Trigger automatic stop or warning when an obstacle is detected,
+    \item Update the web UI to display collision status and alerts.
+\end{itemize}
+
+\subsection*{Task 3: Field Testing and Data Collection}
+
+Perform field tests, including tests at Echo Park, to assess the system and collect real sidewalk data:
+\begin{itemize}[nosep]
+    \item Run the rover along real sidewalks,
+    \item Record sensor, GPS, image, and displacement data,
+    \item Use results to refine system parameters and documentation.
+\end{itemize}
+
+\section{System Architecture Overview}
+
+At a high level, the BOESidewalk system is composed of:
+\begin{itemize}[nosep]
+    \item A mobile rover platform with sensors and cameras,
+    \item Onboard or nearby processing running Python code from \texttt{src/},
+    \item A web-based user interface in \texttt{boe\_sidewalk\_ui/},
+    \item Optional web services or communication logic in \texttt{boe\_sidewalk\_ws/}.
+\end{itemize}
+
+\subsection{High-Level Data Flow}
+
+\begin{enumerate}[nosep]
+    \item The rover moves along sidewalk segments while the operator controls it via remote or UI.
+    \item Sensors collect slope, vertical displacement, GPS position, and images.
+    \item Python scripts process raw sensor streams, associate them with GPS coordinates, and generate results.
+    \item Results are exposed to the web UI, where users can view or export them.
+\end{enumerate}
+
+\section{Components and Pages}
+
+This section breaks down each major page, part, and tool of the project.
+
+\subsection{Rover Control and Status Page}
+
+\textbf{Purpose:} Allow an operator to see rover status and basic telemetry.
+
+\textbf{Key Elements:}
+\begin{itemize}[nosep]
+    \item Rover connection status (online/offline),
+    \item Battery and sensor health indicators,
+    \item Buttons for starting and stopping movement,
+    \item Collision avoidance status indicator (safe / obstacle detected).
+\end{itemize}
+
+\subsection{Data Collection Page}
+
+\textbf{Purpose:} Configure and monitor data collection during runs.
+
+\textbf{Key Elements:}
+\begin{itemize}[nosep]
+    \item Start / stop data logging controls,
+    \item Indicators for active sensors (slope, GPS, camera, displacement),
+    \item Live display of vertical displacement readings (Task 1),
+    \item Checkbox or selector for tagging runs (e.g., ``Echo Park Test'').
+\end{itemize}
+
+\subsection{Data Review / Results Page}
+
+\textbf{Purpose:} Present stored measurement results to the user.
+
+\textbf{Key Elements:}
+\begin{itemize}[nosep]
+    \item List of logged runs with timestamps and locations,
+    \item For each run: maps or tables of slope and displacement values,
+    \item Image gallery of captured sidewalk photos,
+    \item Export options (CSV, images, or reports).
+\end{itemize}
+
+\subsection{Collision Avoidance Module}
+
+\textbf{Purpose:} Prevent rover collisions with obstacles.
+
+\textbf{Responsibilities:}
+\begin{itemize}[nosep]
+    \item Poll sensors that report distance to obstacles,
+    \item Decide when the rover must slow down or stop,
+    \item Notify UI about current collision state,
+    \item Log events when an avoidance action is taken.
+\end{itemize}
+
+\subsection{Vertical Displacement Integration}
+
+\textbf{Purpose:} Incorporate vertical displacement measurements from ME hardware into the software pipeline.
+
+\textbf{Responsibilities:}
+\begin{itemize}[nosep]
+    \item Receive data (via serial, network, or file interface),
+    \item Time-stamp and synchronize it with GPS and images,
+    \item Store it in a consistent data structure,
+    \item Expose it to the UI and export modules.
+\end{itemize}
+
+\section{Tools and Dependencies}
+
+\subsection*{Programming Languages}
+\begin{itemize}[nosep]
+    \item Python (core data processing and possibly sensor control),
+    \item JavaScript, HTML, and CSS (web user interface),
+    \item C/CMake (for low-level hardware or sensor drivers, if present).
+\end{itemize}
+
+\subsection*{Libraries and Frameworks}
+Exact libraries depend on the existing repository, but may include:
+\begin{itemize}[nosep]
+    \item Python numerical / scientific libraries (e.g., NumPy, SciPy),
+    \item Image-processing libraries (e.g., OpenCV),
+    \item Web libraries for serving or communicating with the UI,
+    \item JavaScript libraries for charting or displaying maps (optional).
+\end{itemize}
+
+\subsection*{External Tools}
+\begin{itemize}[nosep]
+    \item Git and GitHub for version control,
+    \item Docker and \texttt{docker-compose} for deployment configuration,
+    \item TestRail for test case and test run management,
+    \item LaTeX for documentation (SDD, SRS, user manual, design spec, snapshot objectives).
+\end{itemize}
+
+\section{Workflow Summary}
+
+\begin{enumerate}[nosep]
+    \item Operator configures a run via the web UI.
+    \item Rover begins moving and collecting sensor, GPS, and image data.
+    \item Vertical displacement module sends measurements to Python processing scripts.
+    \item Collision avoidance module monitors obstacle sensors and intervenes if needed.
+    \item Processed data is logged and made available for review.
+    \item After field tests, data is used to refine algorithms and update documentation.
+\end{enumerate}
+
+\section{Future Enhancements}
+
+Possible extensions beyond this term include:
+\begin{itemize}[nosep]
+    \item Improved mapping and visualization of sidewalk defects,
+    \item Automatic generation of maintenance reports for city staff,
+    \item Advanced machine learning models for defect classification,
+    \item Cloud-based storage and web dashboards for historical data.
+\end{itemize}
+
+\end{document}
