@@ -6,7 +6,7 @@ Project Name: LA City Sidewalk Assessment
 
 
 
-i.Jira link: https://calstatela-cs3338-finalproject.atlassian.net/jira/core/projects/CP/summary
+i. Jira link: https://calstatela-cs3338-finalproject.atlassian.net/jira/core/projects/CP/summary
 
 
 
