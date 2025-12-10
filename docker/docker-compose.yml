@@ -1,0 +1,42 @@
+# If we were creating an application for this data processing pipeline, the docker-compose file would look something similar to this:
+
+version: "3.9"
+
+services:
+  preprocessing:
+    image: python:3.11-slim
+    container_name: lidar-preprocessing
+    working_dir: /app
+    volumes:
+      - ./src/preprocessing:/app
+      - ./data/raw:/data/raw
+      - ./data/processed:/data/processed
+    command: ["python", "run_preprocessing.py"]
+    # Preprocessing converts raw rover LiDAR data into model-ready tensors
+
+  unet_inference:
+    build:
+      context: ./src/unet_model
+      dockerfile: Dockerfile
+    container_name: unet-inference
+    working_dir: /app
+    volumes:
+      - ./data/processed:/data/processed
+      - ./data/predictions:/data/predictions
+    depends_on:
+      - preprocessing
+    command: ["python", "run_inference.py", "--input_dir", "/data/processed", "--output_dir", "/data/predictions"]
+    # U-Net service loads trained weights and generates segmentation masks
+
+  postprocessing:
+    image: python:3.11-slim
+    container_name: hazard-postprocessing
+    working_dir: /app
+    volumes:
+      - ./src/postprocessing:/app
+      - ./data/predictions:/data/predictions
+      - ./data/reports:/data/reports
+    depends_on:
+      - unet_inference
+    command: ["python", "run_postprocessing.py"]
+    # Post-processing maps masks back to real-world coordinates and exports reports
