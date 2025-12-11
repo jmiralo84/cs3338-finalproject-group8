@@ -1,1 +1,1 @@
-https://calstatela-cs3338-finalproject.atlassian.net/jira/core/projects/CP/summary?atlOrigin=eyJpIjoiZTM1OTRmMjdiOTc1NDBjZmEyYzVmZjQ5MmViYTI2MWUiLCJwIjoiaiJ9
+https://calstatela-cs3338-finalproject.atlassian.net/jira/software/projects/CSLSB/summary
